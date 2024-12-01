@@ -3,6 +3,6 @@
 ## How to run
 
 ```
-cd .../advent-of-code-2024
-g++ dayXX/main.cpp && ./a.out
+cd ../advent-of-code-2024/dayXX
+g++ main.cpp && ./a.out
 ```
