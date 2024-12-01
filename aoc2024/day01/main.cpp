@@ -1,55 +1,53 @@
+#include <algorithm>
+#include <chrono>
 #include <iostream>
 #include <fstream>
 #include <string>
-#include <vector>
-#include <bits/stdc++.h>
 
 using namespace std;
 
-
-int main(int argc, char* argv[]) {
-
-    int N = 1000;
-    int left[N];
-    int right[N];
+int main(int __argc, char* argv[])
+{
+    constexpr int n = 1000;
+    int left[n];
+    int right[n];
 
     // compute runtime
     auto start = chrono::high_resolution_clock::now();
 
     // get input stream
-    string line;
     string who = argv[1]; // who is either l or j
-    string fname = "input-"s + who + ".txt"s;
-    cout << fname << '\n';
-    ifstream input(fname);
-    
-    int i = 0;
+    string file_name = "input-"s + who + ".txt"s;
+    ifstream input("day01/" + file_name);
+
     if (input.is_open())
     {
-        while (getline (input,line))
+        int i = 0;
+        string line;
+        
+        while (getline(input, line))
         {
             string delimiter = "   ";
             right[i] = stoi(line.substr(0, line.find(delimiter)));
             left[i] = (stoi(line.substr(line.find(delimiter) + 1, line.length())));
             i++;
         }
-        
+
         input.close();
     }
-    else { 
+    else
+    {
         cout << "Unable to open file";
         return 1;
     }
-
-    assert(i == N);
-
-    // sort the arrays
-    sort(left, left + N);
-    sort(right, right + N);
     
+    // sort the arrays
+    sort(left, left + n);
+    sort(right, right + n);
+
     // calculate the result
     int result = 0;
-    for (int i = 0; i < N; i++)
+    for (int i = 0; i < n; i++)
     {
         result += abs(left[i] - right[i]);
     }
@@ -68,15 +66,15 @@ int main(int argc, char* argv[]) {
     // calculate the result
     result = 0;
 
-    for (int i = 0; i < N; i++)
+    for (int i : left)
     {
         int count = 0;
-        for (int j = 0; j < N; j++)
+        for (int j : right)
         {
-            count += (left[i] == right[j]);
+            count += i == j;
         }
 
-        result += left[i] * count;
+        result += i * count;
     }
 
     // compute runtime
