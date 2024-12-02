@@ -4,5 +4,10 @@
 
 ```
 cd ../advent-of-code-2024/dayXX
-g++ main.cpp && ./a.out
+
+// linux
+g++ ../lib/lib.cpp main.cpp && ./a.out <l , j>
+
+// windows
+g++ ../lib/lib.cpp main.cpp && start /WAIT /B a.exe <l , j>
 ```
