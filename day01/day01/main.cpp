@@ -5,20 +5,19 @@
 
 using namespace std;
 
-int main(int __argc, char* argv[])
+void main(int __argc, char* argv[])
 {
     timer timer;
     constexpr int n = 1000;
     int left[n];
     int right[n];
-    
+
     timer.start();
 
     // read input
-    const auto who = argv[1]; // who is either l or j
-    read_file(who, [&right, &left](const string& line, const int i) -> void
+    const string delimiter = "   ";
+    read_file(argv[1], [&delimiter, &right, &left](const string& line, const int i) -> void
     {
-        const string delimiter = "   ";
         right[i] = stoi(line.substr(0, line.find(delimiter)));
         left[i] = stoi(line.substr(line.find(delimiter) + 1, line.length()));
     });
@@ -33,13 +32,13 @@ int main(int __argc, char* argv[])
     {
         result += abs(left[i] - right[i]);
     }
-    
+
     timer.end();
     cout << "Result: " << result << '\n';
 
     // PART II
     timer.start();
-    
+
     result = 0;
     for (const int i : left)
     {
@@ -51,9 +50,7 @@ int main(int __argc, char* argv[])
 
         result += i * count;
     }
-    
+
     timer.end();
     cout << "Result: " << result << '\n';
-
-    return 0;
 }
