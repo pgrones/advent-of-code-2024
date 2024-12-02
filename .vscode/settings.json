@@ -1,10 +1,15 @@
 {
-    "files.associations": {
-        "iostream": "cpp",
-        "*.tcc": "cpp",
-        "string": "cpp",
-        "unordered_map": "cpp",
-        "unordered_set": "cpp",
-        "string_view": "cpp"
-    }
+  "files.associations": {
+    "*.env.development": "env",
+    "*.env.production": "env",
+    "*.env.test": "env",
+    "*.env.test1": "env",
+    "iostream": "cpp",
+    "*.tcc": "cpp",
+    "string": "cpp",
+    "unordered_map": "cpp",
+    "unordered_set": "cpp",
+    "string_view": "cpp",
+    "chrono": "cpp"
+  }
 }

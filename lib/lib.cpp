@@ -2,7 +2,7 @@
 
 using namespace std;
 
-void read_file(const char* who, const function<void(string, int)>& lambda)
+void read_file(const char *who, const function<void(string, int)> &lambda)
 {
     const string file_name = string("input-") + who + string(".txt");
     ifstream input(file_name);
@@ -25,13 +25,12 @@ void read_file(const char* who, const function<void(string, int)>& lambda)
     }
 }
 
-
-void ::timer::start()
+void timer::start()
 {
     start_ = chrono::high_resolution_clock::now();
 }
 
-void ::timer::end() const
+void timer::end() const
 {
     const chrono::duration<double> elapsed = chrono::high_resolution_clock::now() - start_;
     cout << "Elapsed time: " << elapsed.count() << " s\n";
