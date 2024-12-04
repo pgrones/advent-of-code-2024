@@ -7,7 +7,7 @@ using namespace std;
 
 int main(int argc, char *argv[])
 {
-    timer timer;
+    lib::timer timer;
     constexpr int n = 1000;
     int left[n];
     int right[n];
@@ -16,8 +16,8 @@ int main(int argc, char *argv[])
 
     // read input
     const string delimiter = "   ";
-    read_file(argv[1], [&delimiter, &right, &left](const string &line, const int i) -> void
-              {
+    lib::read_file(argv[1], [&delimiter, &right, &left](const string &line, const int i) -> void
+                   {
         right[i] = stoi(line.substr(0, line.find(delimiter)));
         left[i] = stoi(line.substr(line.find(delimiter) + 1, line.length())); });
 

@@ -6,17 +6,29 @@
 #include <fstream>
 #include <functional>
 #include <iostream>
+#include <vector>
 
-void read_file(const char *who, const std::function<void(std::string, int)> &lambda);
-
-class timer
+namespace lib
 {
-private:
-    std::chrono::time_point<std::chrono::high_resolution_clock> start_;
+    void read_file(const char *who, const std::function<void(std::string, int)> &lambda);
 
-public:
-    void start();
-    void end() const;
-};
+    std::vector<std::string> split(const std::string s, const std::string delimiter);
+
+    template <typename T, typename U>
+    std::vector<U> map(const std::vector<T> &collection, U (*func)(T, int));
+
+    class timer
+    {
+    private:
+        std::chrono::time_point<std::chrono::high_resolution_clock> start_;
+
+    public:
+        void start();
+        void end() const;
+    };
+
+}
+
+#include "lib.tpp"
 
 #endif

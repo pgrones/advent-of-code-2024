@@ -18,10 +18,10 @@ int calculateResult(string const memory)
         string match_str = match.str();
         string numbers = match_str.substr(4, match_str.length() - 5);
 
-        int first = stoi(numbers.substr(0, numbers.find(",")));
-        int last = stoi(numbers.substr(numbers.find(",") + 1));
+        auto parts = lib::map<string, int>(lib::split(numbers, ","), [](string element, int i)
+                                           { return stoi(element); });
 
-        result += first * last;
+        result += parts[0] * parts[1];
     }
 
     return result;
@@ -29,11 +29,11 @@ int calculateResult(string const memory)
 
 int main(int argc, char *argv[])
 {
-    timer timer;
+    lib::timer timer;
     string memory = "";
 
-    read_file(argv[1], [&memory](const string &line, const int i) -> void
-              { memory += line; });
+    lib::read_file(argv[1], [&memory](const string &line, const int i) -> void
+                   { memory += line; });
 
     timer.start();
 
