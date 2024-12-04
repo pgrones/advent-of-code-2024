@@ -2,32 +2,32 @@
 #define LIB_H
 
 #include <chrono>
-#include <string>
 #include <fstream>
 #include <functional>
 #include <iostream>
+#include <string>
 #include <vector>
 
-namespace lib
-{
-    void read_file(const char *who, const std::function<void(std::string, int)> &lambda);
+namespace lib {
+void read_file(const char *who, const std::function<void(std::string, int)> &lambda);
 
-    std::vector<std::string> split(const std::string s, const std::string delimiter);
+std::vector<std::string> split(const std::string s, const std::string delimiter);
 
-    template <typename T, typename U>
-    std::vector<U> map(const std::vector<T> &collection, U (*func)(T, int));
+std::string ctos(const char c);
 
-    class timer
-    {
-    private:
-        std::chrono::time_point<std::chrono::high_resolution_clock> start_;
+template <typename T, typename U>
+std::vector<U> map(const std::vector<T> &collection, U (*func)(T, int));
 
-    public:
-        void start();
-        void end() const;
-    };
+class timer {
+   private:
+    std::chrono::time_point<std::chrono::high_resolution_clock> start_;
 
-}
+   public:
+    void start();
+    void stop() const;
+};
+
+}  // namespace lib
 
 #include "lib.tpp"
 
