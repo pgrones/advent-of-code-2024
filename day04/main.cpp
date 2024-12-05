@@ -4,7 +4,7 @@ using namespace std;
 
 const string letters[3]{"M", "A", "S"};
 
-bool check_match(const vector<vector<string>> map, function<tuple<int, int>(int)> func) {
+bool check_match(const vector<vector<string>> &map, function<tuple<const int, const int>(int)> func) {
     bool isMatch = true;
     int x, y;
 
@@ -20,7 +20,7 @@ bool check_match(const vector<vector<string>> map, function<tuple<int, int>(int)
     return isMatch;
 }
 
-int check_cardinal_directions(const vector<vector<string>> map, const int x, const int y) {
+int check_cardinal_directions(const vector<vector<string>> &map, const int &x, const int &y) {
     int result = 0;
 
     // Up
@@ -42,7 +42,7 @@ int check_cardinal_directions(const vector<vector<string>> map, const int x, con
     return result;
 }
 
-int check_diagonals(const vector<vector<string>> map, const int x, const int y) {
+int check_diagonals(const vector<vector<string>> &map, const int &x, const int &y) {
     int result = 0;
 
     // Up-Left
@@ -64,7 +64,7 @@ int check_diagonals(const vector<vector<string>> map, const int x, const int y) 
     return result;
 }
 
-int check_directions(const vector<vector<string>> map, const int x, const int y) {
+int check_directions(const vector<vector<string>> &map, const int &x, const int &y) {
     return check_cardinal_directions(map, x, y) + check_diagonals(map, x, y);
 }
 
