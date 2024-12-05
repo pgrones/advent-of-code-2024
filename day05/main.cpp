@@ -4,6 +4,84 @@
 
 using namespace std;
 
+tuple<int, vector<vector<int>>> get_invalid_updates(vector<tuple<int, int>> &rules, vector<vector<int>> &updates){
+    int result = 0;
+    int x, y;
+    vector<vector<int>> invalidUpdates;
+
+    for(auto update : updates){
+        bool isValid = true;
+
+        for(size_t i = 0; i < update.size(); i++) {
+            int page = update[i];
+
+            for(auto rule : rules) {
+                tie(x, y) = rule;
+
+                if(x != page && y != page) continue;
+
+                if(x == page) {
+                    for(size_t j = 0; j < update.size(); j++) {
+                        if(update[j] == y){
+                            if(j < i) isValid = false;
+                            break;
+                        }
+                    }
+                }
+            
+                if(y == page) {
+                    for(size_t j = 0; j < update.size(); j++) {
+                        if(update[j] == x){
+                            if(j > i) isValid = false;
+                            break;
+                        }
+                    }
+                }
+
+                if(!isValid) break;
+            }
+        }
+
+        if(isValid) {
+            result += update[update.size() / 2];
+        } else {
+            invalidUpdates.push_back(update);
+        }
+    }
+
+    return make_tuple(result, invalidUpdates);
+}
+
+int order_invalid_updates(vector<tuple<int, int>> &rules, vector<vector<int>> &invalidUpdates){
+    int result = 0;
+
+    for(auto update : invalidUpdates) {
+        vector<int> validUpdate = update;
+
+        sort(validUpdate.begin(), validUpdate.end(), [rules](int a, int b) {
+            int x, y;
+
+            for(auto rule : rules){
+                tie(x, y) = rule;
+
+                if(x == a && y == b){
+                    return true;
+                }
+
+                if(x == b && y == a){
+                    return false;
+                }
+            }
+
+            return false;
+        });
+        
+        result += validUpdate[validUpdate.size() / 2];
+    }
+
+    return result;
+}
+
 int main(int argc, char const *argv[]) {
     lib::timer timer;
     vector<tuple<int, int>> rules;
@@ -27,67 +105,26 @@ int main(int argc, char const *argv[]) {
         updates.push_back(lib::map<string, int>(lib::split(line, ","), [](const string element, const int i){ return stoi(element); }));
     });
 
-    set<int> allNumbers;
-    int x, y;
+    int result;
+    vector<vector<int>> invalidUpdates;
 
     timer.start();
 
-    for (auto ruleTuple : rules)
-    {
-        tie(x, y) = ruleTuple;
-        allNumbers.insert(x);
-        allNumbers.insert(y);
-    }
-
-    // put all numbers from set into array
-    vector<int> allNumbersArray;
-    allNumbersArray.reserve(allNumbers.size());
-    copy (allNumbers.begin(), allNumbers.end(), std::back_inserter(allNumbersArray));
-    
-    int N = allNumbersArray.size();
-
-    lib::print_collection(allNumbersArray);
-
-
-    // swap sort
-    bool sorted = false;
-    size_t i, j;
-    int max_iter = 100;
-    size_t iter = 0;
-    while (!sorted && iter < max_iter) { //) { // && iter < max_iter) {
-        sorted = true;
-        // go over all rules
-        for (auto ruleTuple : rules) {
-            tie(x,y) = ruleTuple;
-            
-            // find indices
-            for (i = 0; i < N; i++) {
-                if (allNumbersArray[i] == x) break;
-            }
-            
-            for (j = 0; j < N; j++) {
-                if (allNumbersArray[j] == y) break;
-            }
-            
-            if (i > j) {
-                // swap i and j
-                allNumbersArray[j] = x;
-                allNumbersArray[i] = y;
-                sorted = false;
-            }
-        }
-
-        iter++;
-        cout << "iter: " << iter << "\n";
-        lib::print_collection(allNumbersArray);
-
-    }
-
-    lib::print_collection(allNumbersArray);
+    tie(result, invalidUpdates) = get_invalid_updates(rules, updates);
 
     timer.stop();
 
-    cout << "Result: " << '\n';
+    cout << "Result: " << result << '\n';
+
+    // PART II
+
+    timer.start();
+
+    result = order_invalid_updates(rules, invalidUpdates);
+
+    timer.stop();
+
+    cout << "Result: " << result << '\n';
 
     return 0;
 }
