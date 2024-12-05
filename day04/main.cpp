@@ -25,19 +25,19 @@ int check_cardinal_directions(const vector<vector<string>> &map, const int &x, c
 
     // Up
     if (y >= 3)
-        result += check_match(map, [&x, &y](int i) { return make_tuple(x, y - i); });
+        result += check_match(map, [x, y](int i) { return make_tuple(x, y - i); });
 
     // Down
     if (y < map.size() - 3)
-        result += check_match(map, [&x, &y](int i) { return make_tuple(x, y + i); });
+        result += check_match(map, [x, y](int i) { return make_tuple(x, y + i); });
 
     // Left
     if (x >= 3)
-        result += check_match(map, [&x, &y](int i) { return make_tuple(x - i, y); });
+        result += check_match(map, [x, y](int i) { return make_tuple(x - i, y); });
 
     // Right
     if (x < map[0].size() - 3)
-        result += check_match(map, [&x, &y](int i) { return make_tuple(x + i, y); });
+        result += check_match(map, [x, y](int i) { return make_tuple(x + i, y); });
 
     return result;
 }
@@ -47,25 +47,44 @@ int check_diagonals(const vector<vector<string>> &map, const int &x, const int &
 
     // Up-Left
     if (y >= 3 && x >= 3)
-        result += check_match(map, [&x, &y](int i) { return make_tuple(x - i, y - i); });
+        result += check_match(map, [x, y](int i) { return make_tuple(x - i, y - i); });
 
     // Down-Left
     if (y < map.size() - 3 && x >= 3)
-        result += check_match(map, [&x, &y](int i) { return make_tuple(x - i, y + i); });
+        result += check_match(map, [x, y](int i) { return make_tuple(x - i, y + i); });
 
     // Up-Right
     if (y >= 3 && x < map[0].size() - 3)
-        result += check_match(map, [&x, &y](int i) { return make_tuple(x + i, y - i); });
+        result += check_match(map, [x, y](int i) { return make_tuple(x + i, y - i); });
 
     // Down-Right
     if (y < map.size() - 3 && x < map[0].size() - 3)
-        result += check_match(map, [&x, &y](int i) { return make_tuple(x + i, y + i); });
+        result += check_match(map, [x, y](int i) { return make_tuple(x + i, y + i); });
 
     return result;
 }
 
 int check_directions(const vector<vector<string>> &map, const int &x, const int &y) {
     return check_cardinal_directions(map, x, y) + check_diagonals(map, x, y);
+}
+
+bool check_x(const vector<vector<string>> &map, const int &x, const int &y) {
+    if (y == 0 || x == 0 || y == map.size() - 1 || x == map[0].size() - 1)
+        return false;
+
+    string letters[4];
+
+    letters[0] = map[y - 1][x - 1];
+    letters[1] = map[y - 1][x + 1];
+    letters[2] = map[y + 1][x + 1];
+    letters[3] = map[y + 1][x - 1];
+
+    for (string letter : letters) {
+        if (letter == "A" || letter == "X")
+            return false;
+    }
+
+    return letters[0] != letters[2] && letters[1] != letters[3];
 }
 
 int main(int argc, char const *argv[]) {
@@ -85,6 +104,23 @@ int main(int argc, char const *argv[]) {
         for (size_t x = 0; x < map[0].size(); x++) {
             if (map[y][x] == "X")
                 result += check_directions(map, x, y);
+        }
+    }
+
+    timer.stop();
+
+    cout << "Result: " << result << '\n';
+
+    // PART II
+
+    result = 0;
+
+    timer.start();
+
+    for (size_t y = 0; y < map.size(); y++) {
+        for (size_t x = 0; x < map[0].size(); x++) {
+            if (map[y][x] == "A")
+                result += check_x(map, x, y);
         }
     }
 
