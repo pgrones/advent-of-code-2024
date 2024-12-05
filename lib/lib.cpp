@@ -3,7 +3,7 @@
 using namespace std;
 
 void lib::read_file(const char *who, const function<void(string, int)> &lambda) {
-    const string file_name = string("input-") + who + string(".txt");
+    const string file_name = who + string(".txt");
     ifstream input(file_name);
 
     if (input.is_open()) {

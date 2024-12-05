@@ -19,6 +19,14 @@ std::vector<std::string> split(const std::string s, const std::string delimiter)
 /* Converts a char to string */
 std::string ctos(const char c);
 
+/* Prints an array to the console */
+template <typename T, int size>
+void print_collection(const std::array<T, size> &collection);
+
+/* Prints a vector to the console */
+template <typename T>
+void print_collection(const std::vector<T> &collection);
+
 /* Calls `func` on each element of the vector and returns the transformed vector */
 template <typename T, typename U>
 std::vector<U> map(const std::vector<T> &collection, U (*func)(T, int));
