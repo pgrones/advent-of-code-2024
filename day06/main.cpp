@@ -1,3 +1,5 @@
+#include <math.h>
+
 #include <unordered_set>
 
 #include "../lib/lib.h"
@@ -41,12 +43,16 @@ char turn_right(const char &dir) {
     return dir;
 }
 
+bool is_out_of_bounds(vector<vector<string>> &map, const size_t &x, const size_t &y) {
+    return x < 0 || y < 0 || x >= map[0].size() || y >= map.size();
+}
+
 tuple<size_t, size_t, char> take_step(vector<vector<string>> &map, const char &dir, const size_t &x, const size_t &y) {
     size_t nextX, nextY;
 
     tie(nextX, nextY) = get_next_pos(dir, x, y);
 
-    if (nextX < 0 || nextY < 0 || nextX >= map[0].size() || nextY >= map.size())
+    if (is_out_of_bounds(map, nextX, nextY))
         return {nextX, nextY, dir};
 
     char nextDir = dir;
@@ -56,7 +62,7 @@ tuple<size_t, size_t, char> take_step(vector<vector<string>> &map, const char &d
 
         tie(nextX, nextY) = get_next_pos(nextDir, x, y);
 
-        if (nextX < 0 || nextY < 0 || nextX >= map[0].size() || nextY >= map.size())
+        if (is_out_of_bounds(map, nextX, nextY))
             return {nextX, nextY, nextDir};
     }
 
@@ -82,15 +88,17 @@ int main(int argc, char const *argv[]) {
         map.push_back(lib::split(line, ""));
     });
 
-    size_t result, x, y;
+    size_t result, x, y, startX, startY;
     char dir = 'u';
     unordered_set<string> positions;
 
     timer.start();
 
-    tie(x, y) = find_start(map);
+    tie(startX, startY) = find_start(map);
+    x = startX;
+    y = startY;
 
-    while (x >= 0 && y >= 0 && x < map[0].size() && y < map.size()) {
+    while (!is_out_of_bounds(map, x, y)) {
         positions.insert(to_string(x) + "," + to_string(y));
         tie(x, y, dir) = take_step(map, dir, x, y);
     }
@@ -103,9 +111,38 @@ int main(int argc, char const *argv[]) {
 
     // PART II
 
+    result = 0;
+
     timer.start();
 
-    // do stuff
+    for (size_t i = 0; i < map.size(); i++) {
+        cout << round(((float)i / (float)map.size()) * 100) << "%" << '\n';
+
+        for (size_t j = 0; j < map[0].size(); j++) {
+            if (map[i][j] == "#")
+                continue;
+
+            x = startX;
+            y = startY;
+            dir = 'u';
+            positions.clear();
+
+            map[i][j] = "#";
+
+            while (!is_out_of_bounds(map, x, y)) {
+                auto res = positions.insert(to_string(x) + "," + to_string(y) + lib::ctos(dir));
+
+                if (!res.second) {
+                    result++;
+                    break;
+                }
+
+                tie(x, y, dir) = take_step(map, dir, x, y);
+            }
+
+            map[i][j] = ".";
+        }
+    }
 
     timer.stop();
 
