@@ -51,6 +51,8 @@ int main(int argc, char const *argv[]) {
 
     cout << "Result: " << result << '\n';
 
+    // PART II
+
     result = 0;
 
     timer.start();
