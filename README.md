@@ -9,5 +9,5 @@ cd ../advent-of-code-2024/dayXX
 g++ ../lib/lib.cpp main.cpp && ./a.out <l , j>
 
 // windows
-g++ ../lib/lib.cpp main.cpp && start /WAIT /B a.exe <l , j>
+g++ -std=gnu++2a ../lib/lib.cpp main.cpp && start /WAIT /B a.exe <l , j>
 ```

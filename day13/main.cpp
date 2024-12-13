@@ -1,3 +1,4 @@
+#include <numeric>
 #include <regex>
 
 #include "../lib/lib.h"
@@ -83,7 +84,7 @@ int main(int argc, char const *argv[]) {
                 if (tokens >= minTokens) break;
 
                 if (x == clawMachine.prize.x && y == clawMachine.prize.y)
-                    minTokens = min(minTokens, tokens);
+                    minTokens = tokens;
             }
         }
 
@@ -107,7 +108,22 @@ int main(int argc, char const *argv[]) {
 
     timer.start();
 
-    // do stuff
+    int i = 0;
+    for (auto clawMachine : clawMachines) {
+        // Can only be solved if the result is divisible by the gcd of (a,b)
+        // I fell down a deep rabbit hole: https://en.m.wikipedia.org/wiki/Diophantine_equation
+        // ax + by = c {a,b,c ints}
+
+        // v This doesn't matter because even if both x and y are divisible, the results still need to line up on the same multiplier
+        long long gx = gcd(clawMachine.a.x, clawMachine.b.x);
+        long long gy = gcd(clawMachine.a.y, clawMachine.b.y);
+
+        if (gx == 1 || gy == 1 || (clawMachine.prize.x + 10000000000000) % gx != 0LL || (clawMachine.prize.y + 10000000000000) % gy != 0LL)
+            continue;
+
+        cout << i << '\n';
+        i++;
+    }
 
     timer.stop();
 
