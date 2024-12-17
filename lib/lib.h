@@ -20,8 +20,8 @@ std::vector<std::string> split(const std::string s, const std::string delimiter)
 std::string ctos(const char c);
 
 /* Prints an array to the console */
-template <typename T, int size>
-void print_collection(const std::array<T, size> &collection);
+template <typename T, size_t size>
+void print_collection(const T (&collection)[size]);
 
 /* Prints a vector to the console */
 template <typename T>

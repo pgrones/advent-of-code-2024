@@ -1,7 +1,7 @@
 #include "lib.h"
 
-using std::vector;
 using std::cout;
+using std::vector;
 
 template <typename T, typename U>
 vector<U> lib::map(const vector<T> &collection, U (*func)(T, int)) {
@@ -15,20 +15,20 @@ vector<U> lib::map(const vector<T> &collection, U (*func)(T, int)) {
     return result;
 }
 
-template <typename T, int size>
-void lib::print_collection(const std::array<T, size> &collection){
-    for (auto item : collection){
+template <typename T, size_t size>
+void lib::print_collection(const T (&collection)[size]) {
+    for (auto item : collection) {
         cout << item << ", ";
     }
-    
-    cout << "\n";
+
+    cout << "\b\b \n";  // remove the last comma
 }
 
 template <typename T>
-void lib::print_collection(const std::vector<T> &collection){
-    for (auto item : collection){
+void lib::print_collection(const std::vector<T> &collection) {
+    for (auto item : collection) {
         cout << item << ", ";
     }
 
-    cout << "\n";
+    cout << "\b\b \n";  // remove the last comma
 }
