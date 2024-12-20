@@ -10,19 +10,6 @@
 
 namespace lib {
 
-struct coordinate {
-    int x;
-    int y;
-
-    bool operator==(const lib::coordinate &other) const {
-        return x == other.x && y == other.y;
-    }
-
-    std::string to_string() const {
-        return std::to_string(x) + "," + std::to_string(y);
-    }
-};
-
 /* Reads a file in the same folder based on `who` and applies `lambda` to each line */
 void read_file(const char *who, const std::function<void(std::string, int)> &lambda);
 
@@ -54,6 +41,33 @@ class timer {
     void start();
     /* Stop the timer and print the elapsed time */
     void stop() const;
+};
+
+struct coordinate {
+    int x;
+    int y;
+
+    bool operator==(const lib::coordinate &other) const {
+        return x == other.x && y == other.y;
+    }
+
+    bool operator!=(const lib::coordinate &other) const {
+        return x != other.x || y != other.y;
+    }
+
+    coordinate() : x(0), y(0) {};
+
+    coordinate(int x, int y) : x{x}, y{y} {};
+
+    coordinate(std::string coord) {
+        auto parts = lib::split(coord, ",");
+        x = std::stoi(parts[0]);
+        y = std::stoi(parts[1]);
+    }
+
+    std::string to_string() const {
+        return std::to_string(x) + "," + std::to_string(y);
+    }
 };
 
 }  // namespace lib
