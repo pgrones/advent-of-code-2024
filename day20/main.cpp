@@ -1,3 +1,4 @@
+#include <queue>
 #include <unordered_map>
 #include <unordered_set>
 
@@ -6,13 +7,91 @@
 using namespace std;
 
 vector<vector<string>> map;
-lib::coordinate startPos, endPos;
 size_t WIDTH, HEIGHT;
+
+struct node {
+    int x;
+    int y;
+    int fScore;
+
+    bool operator==(const node &other) const {
+        return x == other.x && y == other.y;
+    }
+
+    bool operator!=(const node &other) const {
+        return x != other.x || y != other.y;
+    }
+
+    bool operator<(const node &other) const {
+        return fScore < other.fScore;
+    }
+
+    bool operator>(const node &other) const {
+        return fScore > other.fScore;
+    }
+
+    string to_string() const {
+        return std::to_string(x) + "," + std::to_string(y);
+    }
+};
+
+node startPos, endPos;
+
+vector<node> get_neighbors(const node &curr) {
+    vector<node> allNeighbors{{curr.x, curr.y - 1}, {curr.x, curr.y + 1}, {curr.x - 1, curr.y}, {curr.x + 1, curr.y}};
+    vector<node> neighbors;
+
+    copy_if(allNeighbors.begin(), allNeighbors.end(), back_inserter(neighbors), [](node n) {
+        return n.x >= 0 && n.y >= 0 && n.x < WIDTH && n.y < HEIGHT;
+    });
+
+    return neighbors;
+}
+
+unordered_map<string, int> dijkstra(const node &start, const int &radius) {
+    priority_queue<node, vector<node>, greater<node>> openSet;
+    openSet.push(start);
+
+    vector<node> closedSet;
+    unordered_map<string, int> gScore;
+
+    while (!openSet.empty()) {
+        // get next node from open set
+        auto curr = openSet.top();
+        openSet.pop();
+
+        // add to closed set (best value is known)
+        closedSet.push_back(curr);
+
+        // path found, DONE
+        // if (curr != start && map[curr.y][curr.x] == "." ) continue;
+        if (gScore[curr.to_string()] >= radius) continue;
+
+        for (auto neighbor : get_neighbors(curr)) {
+            // neighbor already in closed list, skip
+            if (find(closedSet.begin(), closedSet.end(), neighbor) != closedSet.end()) continue;
+
+            int pathLength = gScore[curr.to_string()] + 1;
+            string neighborKey = neighbor.to_string();
+
+            // if neighbor is in open set and new path is not better, continue
+            if (gScore.find(neighbor.to_string()) == gScore.end() || pathLength < gScore[neighbor.to_string()]) {
+                // update g value
+                gScore[neighborKey] = pathLength;
+                // update f value
+                neighbor.fScore = pathLength;
+                openSet.push(neighbor);
+            }
+        }
+    }
+
+    return gScore;
+}
 
 void print_map(unordered_map<string, int> &way_to_go) {
     for (int y = 0; y < map.size(); y++) {
         for (int x = 0; x < map[0].size(); x++) {
-            lib::coordinate c = {x, y};
+            node c = {x, y};
 
             if (way_to_go.find(c.to_string()) != way_to_go.end()) {
                 string a = to_string(way_to_go[c.to_string()]);
@@ -26,8 +105,8 @@ void print_map(unordered_map<string, int> &way_to_go) {
     }
 }
 
-lib::coordinate get_neighbor(const lib::coordinate &curr, const unordered_map<string, int> &distances) {
-    lib::coordinate neighbors[4]{{curr.x, curr.y + 1}, {curr.x, curr.y - 1}, {curr.x + 1, curr.y}, {curr.x - 1, curr.y}};
+node get_neighbor(const node &curr, const unordered_map<string, int> &distances) {
+    node neighbors[4]{{curr.x, curr.y + 1}, {curr.x, curr.y - 1}, {curr.x + 1, curr.y}, {curr.x - 1, curr.y}};
 
     for (auto neighbor : neighbors) {
         if (map[neighbor.y][neighbor.x] == "#") continue;
@@ -39,9 +118,9 @@ lib::coordinate get_neighbor(const lib::coordinate &curr, const unordered_map<st
     return {-1, -1};
 }
 
-pair<vector<lib::coordinate>, unordered_map<string, int>> find_path() {
+pair<vector<node>, unordered_map<string, int>> find_path() {
     unordered_map<string, int> way_to_go;
-    vector<lib::coordinate> path;
+    vector<node> path;
     auto curr = endPos;
     int dist = 0;
 
@@ -58,55 +137,22 @@ pair<vector<lib::coordinate>, unordered_map<string, int>> find_path() {
     return {path, way_to_go};
 }
 
-void find_paths_through_walls(const lib::coordinate &curr, const lib::coordinate &start, unordered_set<string> &path, unordered_map<string, size_t> &neighbors_behind_walls, const int max_cheat_length) {
-    if (curr == start) return;
-    if (path.size() > max_cheat_length) return;
-    if (curr.x < 0 || curr.y < 0 || curr.x >= WIDTH || curr.y >= HEIGHT) return;
-
-    if (map[curr.y][curr.x] == ".") {
-        neighbors_behind_walls[curr.to_string() + ";" + to_string(path.size())] = path.size();
-        return;
-    }
-
-    lib::coordinate neighbors[4]{{curr.x, curr.y + 1}, {curr.x, curr.y - 1}, {curr.x + 1, curr.y}, {curr.x - 1, curr.y}};
-
-    for (auto neighbor : neighbors) {
-        if (!path.insert(neighbor.to_string()).second) continue;
-        find_paths_through_walls(neighbor, start, path, neighbors_behind_walls, max_cheat_length);
-        path.erase(neighbor.to_string());
-    }
-}
-
-unordered_map<string, size_t> get_neighbors_behind_walls(const lib::coordinate &curr, const int max_cheat_length) {
-    unordered_map<string, size_t> neighbors_behind_walls;
-    unordered_set<string> path;
-
-    vector<lib::coordinate> neighbors{{curr.x, curr.y + 1}, {curr.x, curr.y - 1}, {curr.x + 1, curr.y}, {curr.x - 1, curr.y}};
-    vector<lib::coordinate> walls;
-
-    copy_if(neighbors.begin(), neighbors.end(), back_inserter(walls), [](const lib::coordinate coord) { return map[coord.y][coord.x] == "#"; });
-
-    for (auto wall : walls) {
-        path.insert(wall.to_string());
-        find_paths_through_walls(wall, curr, path, neighbors_behind_walls, max_cheat_length);
-        path.erase(wall.to_string());
-    }
-
-    return neighbors_behind_walls;
-}
-
-int cheat(const vector<lib::coordinate> &path, unordered_map<string, int> &way_to_go, const int max_cheat_length) {
+int cheat(const vector<node> &path, unordered_map<string, int> &way_to_go, const int max_cheat_length) {
     int good_cheats = 0, cheat;
     size_t cheat_length;
     string coordKey;
 
     for (auto coord : path) {
-        for (auto behind_wall : get_neighbors_behind_walls(coord, max_cheat_length)) {
-            tie(coordKey, cheat_length) = behind_wall;
-            coordKey = coordKey.substr(0, coordKey.find(';'));
-            cheat = way_to_go[coord.to_string()] - way_to_go[coordKey] - cheat_length;
+        auto gScores = dijkstra(coord, max_cheat_length);
 
-            if (cheat >= 72) good_cheats++;
+        for (auto wall_or_behind_wall : gScores) {
+            tie(coordKey, cheat_length) = wall_or_behind_wall;
+            lib::coordinate c(coordKey);
+
+            if (map[c.y][c.x] == ".") {
+                cheat = way_to_go[coord.to_string()] - way_to_go[coordKey] - cheat_length;
+                if (cheat >= 100) good_cheats++;
+            }
         }
     }
 
