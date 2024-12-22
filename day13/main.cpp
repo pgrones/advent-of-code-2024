@@ -1,5 +1,9 @@
 #include <numeric>
 #include <regex>
+#include <cmath>
+#include <cassert>
+
+#include <climits>
 
 #include "../lib/lib.h"
 
@@ -16,25 +20,44 @@ struct claw_machine {
     coordinate prize;
 };
 
-struct depth {
-    int a;
-    int b;
-};
+double solve(claw_machine m, bool partII = false) {
+    //  c1 * ax + c2 * bx == px
+    //  c1 * ay + c2 * by == py
 
-int find_fewest_tokens(const claw_machine &claw_machine, coordinate position = {0, 0}, depth depth = {0, 0}, int tokens = 0, int minTokens = INT_MAX) {
-    if (depth.a >= 100 || depth.b >= 100) return minTokens;
+    double ax = m.a.x;
+    double ay = m.a.y;
+    double bx = m.b.x;
+    double by = m.b.y;
 
-    if (position.x > claw_machine.prize.x || position.y > claw_machine.prize.y) return minTokens;
+    double px = m.prize.x;
+    double py = m.prize.y;
 
-    if (minTokens <= tokens) return minTokens;
+    if (partII) {
+        // part II
+        px += 10000000000000;
+        py += 10000000000000;
+    }
 
-    if (position.x == claw_machine.prize.x && position.y == claw_machine.prize.y) return tokens;
+    assert(ax != bx || ay != by);
 
-    int eval = find_fewest_tokens(claw_machine, {position.x + claw_machine.b.x, position.y + claw_machine.b.y}, {depth.a, depth.b + 1}, tokens + 1, minTokens);
+    // [ax bx; ay by] (c1 c2) == p
+    // c2 = 1/bx (px - c1 ax)
+    // c1 = 1 / ay (py - by/bx (px - c1 ax))
+    // c1 (1 - 1/ay by/bx ax) = 1/ay (py - by/bx px)
+    double c1 = 1 / (1 - 1/ay * by/bx * ax) * 1/ay * (py - by/bx * px);
+    double c2 = 1/bx * (px - c1 * ax);
 
-    if (minTokens != INT_MAX && eval >= minTokens) return minTokens;
+    // printf("%f, %f\n", c1, c2);
+    // printf("check: (%f, %f) ?= (%f, %f)\n\n", c1*ax+c2*bx, c1*ay+c2*by, px, py);
 
-    return find_fewest_tokens(claw_machine, {position.x + claw_machine.a.x, position.y + claw_machine.a.y}, {depth.a + 1, depth.b}, tokens + 3, eval);
+    // check if int (rounding)
+    if (!(abs(c1 - (unsigned long long)round(c1)) < 1e-2 && abs(c2 - (unsigned long long)round(c2)) < 1e-2)) return 0;
+    // not negative
+    if (c1 < 0 || c2 < 0) return 0;
+    // not larger than 100
+    // if (c1 > 100 || c2 > 100) return 0;
+    
+    return 3 * round(c1) + round(c2);
 }
 
 int main(int argc, char const *argv[]) {
@@ -65,38 +88,13 @@ int main(int argc, char const *argv[]) {
         lineNr++;
     });
 
-    int result = 0;
+    double result = 0;
 
     timer.start();
 
     for (auto clawMachine : clawMachines) {
-        int minTokens = INT_MAX;
-
-        for (int b = 0; b < 100; b++) {
-            for (int a = 0; a < 100; a++) {
-                int x = b * clawMachine.b.x + a * clawMachine.a.x;
-                int y = b * clawMachine.b.y + a * clawMachine.a.y;
-
-                if (x > clawMachine.prize.x || y > clawMachine.prize.y) break;
-
-                int tokens = b + a * 3;
-
-                if (tokens >= minTokens) break;
-
-                if (x == clawMachine.prize.x && y == clawMachine.prize.y)
-                    minTokens = tokens;
-            }
-        }
-
-        if (minTokens != INT_MAX) result += minTokens;
+        result += solve(clawMachine);
     }
-
-    // for (auto clawMachine : clawMachines) {
-    //     int minTokens = find_fewest_tokens(clawMachine);
-
-    //     if (minTokens != INT_MAX)
-    //         result += minTokens;
-    // }
 
     timer.stop();
 
@@ -108,26 +106,13 @@ int main(int argc, char const *argv[]) {
 
     timer.start();
 
-    int i = 0;
     for (auto clawMachine : clawMachines) {
-        // Can only be solved if the result is divisible by the gcd of (a,b)
-        // I fell down a deep rabbit hole: https://en.m.wikipedia.org/wiki/Diophantine_equation
-        // ax + by = c {a,b,c ints}
-
-        // v This doesn't matter because even if both x and y are divisible, the results still need to line up on the same multiplier
-        long long gx = gcd(clawMachine.a.x, clawMachine.b.x);
-        long long gy = gcd(clawMachine.a.y, clawMachine.b.y);
-
-        if (gx == 1 || gy == 1 || (clawMachine.prize.x + 10000000000000) % gx != 0LL || (clawMachine.prize.y + 10000000000000) % gy != 0LL)
-            continue;
-
-        cout << i << '\n';
-        i++;
+        result += solve(clawMachine, true);
     }
 
     timer.stop();
 
-    cout << "Result: " << result << '\n';
+    printf("Result: %.0f\n", result);
 
     return 0;
 }
