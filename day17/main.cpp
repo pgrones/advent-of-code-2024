@@ -1,17 +1,20 @@
 #include <math.h>
 
+#include <algorithm>
+#include <numeric>
+
 #include "../lib/lib.h"
 
 using namespace std;
 
 class computer {
-    int a;
-    int b;
-    int c;
+    long long a;
+    long long b;
+    long long c;
     int pointer;
-    vector<int> out_buffer;
+    vector<string> out_buffer;
 
-    int get_combo_operand(int operand) {
+    long long get_combo_operand(int operand) {
         if (operand <= 3) return operand;
 
         switch (operand) {
@@ -26,7 +29,7 @@ class computer {
         }
     }
 
-    void run_instruction(int instruction, int operand) {
+    void run_instruction(int instruction, long long operand) {
         switch (instruction) {
             case 0:
                 adv(operand);
@@ -61,22 +64,22 @@ class computer {
         pointer += 2;
     }
 
-    void adv(int operand) {
+    void adv(long long operand) {
         a /= pow(2, get_combo_operand(operand));
         increment_pointer();
     }
 
-    void bxl(int operand) {
+    void bxl(long long operand) {
         b ^= operand;
         increment_pointer();
     }
 
-    void bst(int operand) {
+    void bst(long long operand) {
         b = get_combo_operand(operand) % 8;
         increment_pointer();
     }
 
-    void jnz(int operand) {
+    void jnz(long long operand) {
         if (a == 0) {
             increment_pointer();
             return;
@@ -90,23 +93,23 @@ class computer {
         increment_pointer();
     }
 
-    void out(int operand) {
-        out_buffer.push_back(get_combo_operand(operand) % 8);
+    void out(long long operand) {
+        out_buffer.push_back(to_string(get_combo_operand(operand) % 8));
         increment_pointer();
     }
 
-    void bdv(int operand) {
+    void bdv(long long operand) {
         b = a / pow(2, get_combo_operand(operand));
         increment_pointer();
     }
 
-    void cdv(int operand) {
+    void cdv(long long operand) {
         c = a / pow(2, get_combo_operand(operand));
         increment_pointer();
     }
 
    public:
-    computer(int a, int b, int c) {
+    computer(long long a, long long b, long long c) {
         this->a = a;
         this->b = b;
         this->c = c;
@@ -118,11 +121,9 @@ class computer {
             run_instruction(instructions[pointer], instructions[pointer + 1]);
         }
 
-        string result;
-        for (auto outValue : out_buffer)
-            result += to_string(outValue) + ",";
-
-        return result.substr(0, result.size() - 1);
+        return accumulate(next(out_buffer.begin()), out_buffer.end(), out_buffer[0], [](string a, string b) {
+            return a + ',' + b;
+        });
     }
 };
 
@@ -165,19 +166,32 @@ int main(int argc, char const *argv[]) {
 
     timer.start();
 
-    int registerA = -1;
-    int onePercentOfIntMax = INT_MAX * 0.01;
-    while (result != program || registerA == registers[0]) {
-        registerA++;
-        result = computer(registerA, registers[1], registers[2]).run(instructions);
+    vector<long long> as = {(long long)pow(8, 15)};
+    for (int i = 0; i < 16; i++) {
+        long long digit = pow(8, 15 - i);
+        vector<long long> next_as;
 
-        if (registerA % onePercentOfIntMax == 0)
-            cout << to_string(registerA / onePercentOfIntMax) + "\% of INT_MAX searched" << '\n';
+        for (int j = 0; j < 8; j++) {
+            for (auto ai : as) {
+                long long a = ai + j * digit;
+
+                result = computer(a, registers[1], registers[2]).run(instructions);
+                auto result_vec = lib::map<string, int>(lib::split(result, ","), [](const string item, const int _) { return stoi(item); });
+
+                if (result_vec[15 - i] == instructions[15 - i]) {
+                    next_as.push_back(a);
+                }
+            }
+        }
+
+        as = next_as;
     }
+
+    sort(as.begin(), as.end());
 
     timer.stop();
 
-    cout << "Result: " << registerA << '\n';
+    cout << "Result: " << as[0] << '\n';
 
     return 0;
 }
